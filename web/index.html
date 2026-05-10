@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour du Monde en Famille 🌍</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem 1rem 1.5rem;
+      text-align: center;
+    }
+    header h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+    header .subtitle { opacity: 0.85; font-size: 0.95rem; }
+    header .country-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2rem;
+      padding: 0.4rem 1.2rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0.8rem 0;
+      letter-spacing: 0.02em;
+    }
+
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.2);
+      border-radius: 1rem;
+      height: 8px;
+      max-width: 300px;
+      margin: 0.8rem auto 0.3rem;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #68d391;
+      border-radius: 1rem;
+      transition: width 0.4s ease;
+    }
+    .progress-label { font-size: 0.8rem; opacity: 0.8; }
+
+    main { max-width: 680px; margin: 1.5rem auto; padding: 0 1rem 3rem; }
+
+    .day-card {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .day-header {
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .day-theme { font-weight: 400; font-size: 0.8rem; opacity: 0.75; text-transform: none; }
+
+    .activity {
+      padding: 0.9rem 1rem;
+      border-top: 1px solid #f0f4f8;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .activity:hover { background: #f7fafc; }
+
+    .activity-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 2rem;
+      text-align: center;
+    }
+    .activity-body { flex: 1; }
+    .activity-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+    .activity-desc {
+      font-size: 0.82rem;
+      color: #718096;
+      line-height: 1.45;
+      margin-bottom: 0.4rem;
+    }
+    .activity-meta { font-size: 0.75rem; color: #a0aec0; }
+
+    .status-badge {
+      flex-shrink: 0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      align-self: center;
+      transition: transform 0.1s;
+    }
+    .status-badge:active { transform: scale(0.93); }
+
+    .status-todo    { background: #edf2f7; color: #718096; }
+    .status-doing   { background: #ebf8ff; color: #2b6cb0; }
+    .status-done    { background: #f0fff4; color: #276749; }
+    .status-skip    { background: #fff5f5; color: #c53030; text-decoration: line-through; }
+
+    .activity.done .activity-title { text-decoration: line-through; color: #a0aec0; }
+    .activity.skip { opacity: 0.5; }
+
+    /* Day color accents */
+    .day-lundi    .day-header { background: #fff5f5; color: #c53030; }
+    .day-mardi    .day-header { background: #fffaf0; color: #c05621; }
+    .day-mercredi .day-header { background: #f0fff4; color: #276749; }
+    .day-jeudi    .day-header { background: #ebf8ff; color: #2b6cb0; }
+    .day-vendredi .day-header { background: #faf5ff; color: #6b46c1; }
+    .day-samedi   .day-header { background: #fff5f7; color: #97266d; }
+
+    #loading { text-align: center; padding: 3rem; color: #a0aec0; }
+    #error { background: #fff5f5; color: #c53030; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 Tour du Monde en Famille</h1>
+  <div class="subtitle">Hassan · Yovana · Alice · Liam</div>
+  <div class="country-badge" id="country-badge">…</div>
+  <div class="subtitle" id="week-label"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="progress-label">Chargement…</div>
+</header>
+
+<main id="main">
+  <div id="loading">Chargement du programme…</div>
+</main>
+
+<script>
+const REPO = 'hbouamar/tour-du-monde-famille';
+const RAW  = `https://raw.githubusercontent.com/${REPO}/main/data`;
+
+const DAYS_FR = {
+  lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi',
+  jeudi: 'Jeudi', vendredi: 'Vendredi', samedi: 'Samedi'
+};
+
+const TYPE_ICONS = {
+  cuisine: '🍳', 'art/artisanat': '🎨', 'musique/danse': '🎵',
+  'histoire/géographie': '🗺️', film: '🎬', livre: '📚',
+  'jeux/sports traditionnels': '🎯', default: '✨'
+};
+
+const STATUS_CYCLE = ['todo', 'doing', 'done', 'skip'];
+const STATUS_LABELS = { todo: '⬜ À faire', doing: '🔄 En cours', done: '✅ Fait', skip: '⏭️ Passé' };
+
+const FLAGS = {
+  'Japon': '🇯🇵', 'Brésil': '🇧🇷', 'Égypte': '🇪🇬', 'Inde': '🇮🇳',
+  'Mexique': '🇲🇽', 'Italie': '🇮🇹', 'Maroc': '🇲🇦', 'Chine': '🇨🇳',
+  'France': '🇫🇷', 'Kenya': '🇰🇪', 'Australie': '🇦🇺', 'Grèce': '🇬🇷',
+  'Pérou': '🇵🇪', 'Russie': '🇷🇺', 'Turquie': '🇹🇷', 'Vietnam': '🇻🇳',
+  'Thaïlande': '🇹🇭', 'Nigeria': '🇳🇬', 'Argentine': '🇦🇷', 'Allemagne': '🇩🇪',
+  'Portugal': '🇵🇹', 'Espagne': '🇪🇸', 'Sénégal': '🇸🇳', 'Éthiopie': '🇪🇹',
+  'Colombie': '🇨🇴', 'Corée du Sud': '🇰🇷', 'Indonésie': '🇮🇩',
+};
+
+function getProgress() {
+  try { return JSON.parse(localStorage.getItem('progress') || '{}'); }
+  catch { return {}; }
+}
+function saveProgress(p) {
+  localStorage.setItem('progress', JSON.stringify(p));
+}
+function clearProgressIfNewWeek(weekStart) {
+  const stored = localStorage.getItem('week_start');
+  if (stored !== weekStart) {
+    localStorage.removeItem('progress');
+    localStorage.setItem('week_start', weekStart);
+  }
+}
+
+function updateProgressUI(progress, totalActivities) {
+  const done = Object.values(progress).filter(s => s === 'done').length;
+  const pct  = totalActivities ? Math.round(done / totalActivities * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} / ${totalActivities} activités réalisées`;
+}
+
+function formatWeekLabel(weekStart) {
+  const d = new Date(weekStart + 'T12:00:00');
+  const end = new Date(d); end.setDate(d.getDate() + 5);
+  const fmt = dt => dt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  return `Semaine du ${fmt(d)} au ${fmt(end)}`;
+}
+
+function render(program, progress) {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  const days = program.days || {};
+  const dayKeys = Object.keys(days);
+  let total = 0;
+
+  for (const day of dayKeys) {
+    const data = days[day];
+    const activities = data.activities || [];
+    total += activities.length;
+
+    const card = document.createElement('div');
+    card.className = `day-card day-${day}`;
+
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    header.innerHTML = `<span>${DAYS_FR[day] || day}</span><span class="day-theme">${data.theme || ''}</span>`;
+    card.appendChild(header);
+
+    for (const act of activities) {
+      const status  = progress[act.id] || 'todo';
+      const icon    = TYPE_ICONS[act.type] || TYPE_ICONS.default;
+
+      const el = document.createElement('div');
+      el.className = `activity ${status}`;
+      el.dataset.id = act.id;
+      el.innerHTML = `
+        <div class="activity-icon">${icon}</div>
+        <div class="activity-body">
+          <div class="activity-title">${act.title}</div>
+          <div class="activity-desc">${act.description}</div>
+          <div class="activity-meta">${act.duration || ''} · ${act.type || ''}</div>
+        </div>
+        <div class="status-badge status-${status}" data-id="${act.id}">${STATUS_LABELS[status]}</div>
+      `;
+
+      el.addEventListener('click', () => {
+        const p = getProgress();
+        const cur = p[act.id] || 'todo';
+        const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
+        p[act.id] = next;
+        saveProgress(p);
+        el.className = `activity ${next}`;
+        el.querySelector('.status-badge').className = `status-badge status-${next}`;
+        el.querySelector('.status-badge').textContent = STATUS_LABELS[next];
+        updateProgressUI(p, total);
+      });
+
+      card.appendChild(el);
+    }
+    main.appendChild(card);
+  }
+
+  updateProgressUI(progress, total);
+}
+
+async function init() {
+  try {
+    const [progRes, dataRes] = await Promise.all([
+      fetch(`${RAW}/progress.json`),
+      fetch(`${RAW}/current_program.json`)
+    ]);
+    const program  = await dataRes.json();
+    const serverProgress = await progRes.json();
+
+    clearProgressIfNewWeek(program.week_start);
+    const localProgress = getProgress();
+
+    // Merge: local overrides server for keys that exist locally
+    const progress = Object.fromEntries(
+      Object.keys(serverProgress).map(k => [k, localProgress[k] || serverProgress[k]])
+    );
+
+    const flag = FLAGS[program.country] || '🌍';
+    document.getElementById('country-badge').textContent = `${flag} ${program.country}`;
+    document.getElementById('week-label').textContent = formatWeekLabel(program.week_start);
+    document.title = `${flag} ${program.country} – Tour du Monde`;
+
+    render(program, progress);
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      `<div id="error">Impossible de charger le programme.<br><small>${e.message}</small></div>`;
+    document.getElementById('progress-label').textContent = '';
+    document.getElementById('country-badge').textContent = '🌍';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

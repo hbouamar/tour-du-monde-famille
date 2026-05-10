@@ -1,6 +1,7 @@
 # Tour du Monde en Famille 🌍
 
 ## Contexte famille
+- Parents : Hassan et Yovana
 - Alice (7 ans, 8 ans le 21 avril) et Liam (presque 12 ans, 12 ans le 6 juillet)
 - Programme culturel hebdomadaire : lundi → samedi
 

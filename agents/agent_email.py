@@ -1,0 +1,56 @@
+import json
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import google.generativeai as genai
+
+
+def _generate_html(program: dict) -> str:
+    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    prompt = f"""Rédige un email récapitulatif familial pour le programme culturel de la semaine.
+
+Programme :
+{json.dumps(program, ensure_ascii=False, indent=2)}
+
+L'email doit :
+- S'adresser à Alice (7 ans), Liam (12 ans) et leurs parents avec enthousiasme
+- Présenter le pays de la semaine de façon accrocheuse
+- Résumer chaque jour avec son thème et ses activités
+- Terminer par un message d'encouragement
+- Être en HTML simple compatible Gmail (pas de CSS externe)
+- Utiliser des emojis 🌍
+
+Réponds UNIQUEMENT avec le HTML (commence par <html>)."""
+
+    return model.generate_content(prompt).text.strip()
+
+
+def send_email(program: dict):
+    gmail_user = os.environ["GMAIL_USER"]
+    gmail_password = os.environ["GMAIL_APP_PASSWORD"]
+    recipient = os.environ["EMAIL_RECIPIENT"]
+
+    country = program.get("country", "le monde")
+    week_start = program.get("week_start", "")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"🌍 Cette semaine on voyage en {country} ! ({week_start})"
+    msg["From"] = gmail_user
+    msg["To"] = recipient
+
+    msg.attach(MIMEText(_generate_html(program), "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(gmail_user, gmail_password)
+        server.sendmail(gmail_user, recipient, msg.as_string())
+
+    print(f"Email envoyé à {recipient}")
+
+
+if __name__ == "__main__":
+    with open("data/current_program.json", encoding="utf-8") as f:
+        program = json.load(f)
+    send_email(program)

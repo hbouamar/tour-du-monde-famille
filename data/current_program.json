@@ -10,7 +10,8 @@
           "title": "Onigiri faciles",
           "description": "Préparez des onigiri (boules de riz) avec différentes garnitures comme du thon mayo, de l'umeboshi (prune salée) ou des légumes.  Alice peut aider à former les triangles et Liam à préparer les garnitures. Dégustez-les ensemble!",
           "type": "cuisine",
-          "duration": "45min"
+          "duration": "45min",
+          "resource_query": "onigiri recette facile enfants tutoriel français"
         }
       ]
     },
@@ -22,14 +23,16 @@
           "title": "Grue en origami",
           "description": "Apprenez à plier une grue en origami, symbole de paix et de longévité au Japon.  Alice peut colorier le papier avant de plier et Liam peut s'attaquer à des pliages plus complexes.",
           "type": "art/artisanat",
-          "duration": "60min"
+          "duration": "60min",
+          "resource_query": "origami grue tutoriel pas à pas débutant enfants"
         },
         {
           "id": "mardi_2",
           "title": "Histoire du Japon",
           "description": "Découvrez brièvement l'histoire de Sadako Sasaki et le lien avec la grue en papier. Expliquez l'importance de la paix et de la résilience.",
           "type": "histoire/géographie",
-          "duration": "30min"
+          "duration": "30min",
+          "resource_query": "Sadako Sasaki histoire grue origami paix documentaire enfants"
         }
       ]
     },
@@ -41,14 +44,16 @@
           "title": "Initiation au Taiko",
           "description": "Écoutez de la musique Taiko et essayez de reproduire les rythmes en tapant sur des casseroles ou des seaux.  Apprenez quelques mouvements simples de Taiko.",
           "type": "musique/danse",
-          "duration": "45min"
+          "duration": "45min",
+          "resource_query": "taiko tambour japonais musique initiation enfants"
         },
         {
           "id": "mercredi_2",
           "title": "Un conte japonais",
           "description": "Lisez ou écoutez un conte traditionnel japonais comme 'Momotaro' (le garçon pêche) ou 'Urashima Taro' (le pêcheur et la princesse).  Discutez des thèmes et des morales de l'histoire.",
           "type": "livre",
-          "duration": "30min"
+          "duration": "30min",
+          "resource_query": "Momotaro conte japonais en français enfants"
         }
       ]
     },
@@ -60,14 +65,16 @@
           "title": "Voyage virtuel au Japon",
           "description": "Utilisez Google Maps ou un documentaire pour explorer différentes régions du Japon, des montagnes enneigées aux villes animées.  Concentrez-vous sur les paysages, la faune et la flore.",
           "type": "histoire/géographie",
-          "duration": "60min"
+          "duration": "60min",
+          "resource_query": "Japon documentaire voyage régions enfants français"
         },
         {
           "id": "jeudi_2",
           "title": "Ramen maison",
           "description": "Préparez un bol de ramen simplifié. Alice peut aider à assembler les ingrédients et Liam à préparer le bouillon.  Personnalisez-le avec leurs garnitures préférées.",
           "type": "cuisine",
-          "duration": "60min"
+          "duration": "60min",
+          "resource_query": "ramen maison recette simple rapide enfants"
         }
       ]
     },
@@ -79,7 +86,8 @@
           "title": "Visionnage de Totoro",
           "description": "Regardez le film d'animation 'Mon Voisin Totoro' de Studio Ghibli.  Discutez des personnages, des thèmes et de l'esthétique du film.",
           "type": "film",
-          "duration": "90min"
+          "duration": "90min",
+          "resource_query": "Mon Voisin Totoro bande annonce Studio Ghibli"
         }
       ]
     },
@@ -91,14 +99,16 @@
           "title": "Jeu de Go simplifié",
           "description": "Apprenez les règles de base du jeu de Go et jouez une partie simplifiée sur un plateau plus petit.  Concentrez-vous sur la stratégie et la planification.",
           "type": "jeux/sports traditionnels",
-          "duration": "60min"
+          "duration": "60min",
+          "resource_query": "jeu de Go règles débutants enfants tutoriel français"
         },
         {
           "id": "samedi_2",
           "title": "Desserts japonais",
           "description": "Faites des mochi ou des dango (boulettes de riz sucrées).  Alice peut aider à former les boules et Liam à préparer les différentes saveurs.",
           "type": "cuisine",
-          "duration": "60min"
+          "duration": "60min",
+          "resource_query": "mochi recette maison facile enfants français"
         }
       ]
     }

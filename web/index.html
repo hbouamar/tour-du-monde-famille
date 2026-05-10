@@ -100,6 +100,17 @@
       margin-bottom: 0.4rem;
     }
     .activity-meta { font-size: 0.75rem; color: #a0aec0; }
+    .activity-resource {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      color: #4299e1;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .activity-resource:hover { text-decoration: underline; }
 
     .status-badge {
       flex-shrink: 0;
@@ -242,6 +253,7 @@ function render(program, progress) {
           <div class="activity-title">${act.title}</div>
           <div class="activity-desc">${act.description}</div>
           <div class="activity-meta">${act.duration || ''} · ${act.type || ''}</div>
+          ${act.resource_query ? `<a class="activity-resource" href="https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Voir une vidéo</a>` : ''}
         </div>
         <div class="status-badge status-${status}" data-id="${act.id}">${STATUS_LABELS[status]}</div>
       `;

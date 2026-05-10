@@ -27,7 +27,7 @@ Réponds UNIQUEMENT avec un JSON valide :
     "lundi": {{
       "theme": "thème court du jour",
       "activities": [
-        {{"id": "lundi_1", "title": "titre court", "description": "2-3 phrases concrètes", "type": "cuisine", "duration": "45min"}}
+        {{"id": "lundi_1", "title": "titre court", "description": "2-3 phrases concrètes", "type": "cuisine", "duration": "45min", "resource_query": "requête YouTube pertinente en français pour cette activité"}}
       ]
     }},
     "mardi": {{}},

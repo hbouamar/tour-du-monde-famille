@@ -1,17 +1,16 @@
 import json
 import os
-import google.generativeai as genai
+from google import genai
 
 
 def suggest_countries() -> list[str]:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     with open("data/history.json", encoding="utf-8") as f:
         history = json.load(f)
 
     history_str = ", ".join(history) if history else "aucun pays pour l'instant"
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""Tu es un expert en cultures du monde pour enfants.
 Propose 3 pays différents pour un programme culturel familial hebdomadaire.
 Pays déjà explorés (à éviter absolument) : {history_str}
@@ -24,7 +23,7 @@ Critères :
 Réponds UNIQUEMENT avec un JSON valide :
 {{"pays": ["Pays1", "Pays2", "Pays3"]}}"""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     text = response.text.strip()
 
     if "```json" in text:

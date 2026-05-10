@@ -3,12 +3,11 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import google.generativeai as genai
+from google import genai
 
 
 def _generate_html(program: dict) -> str:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     prompt = f"""Rédige un email récapitulatif familial pour le programme culturel de la semaine.
 
@@ -25,7 +24,7 @@ L'email doit :
 
 Réponds UNIQUEMENT avec le HTML (commence par <html>)."""
 
-    return model.generate_content(prompt).text.strip()
+    return client.models.generate_content(model="gemini-2.0-flash", contents=prompt).text.strip()
 
 
 def send_email(program: dict):

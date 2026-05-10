@@ -1,19 +1,18 @@
 import json
 import os
 from datetime import datetime, timedelta
-import google.generativeai as genai
+from google import genai
 
 DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
 
 
 def generate_program(country: str) -> dict:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     today = datetime.today()
     days_until_monday = (7 - today.weekday()) % 7 or 7
     week_start = (today + timedelta(days=days_until_monday)).strftime("%Y-%m-%d")
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""Crée un programme culturel hebdomadaire sur le pays : {country}
 Pour une famille avec Alice (7 ans) et Liam (12 ans).
 Programme du lundi au samedi (6 jours).
@@ -39,7 +38,7 @@ Réponds UNIQUEMENT avec un JSON valide :
   }}
 }}"""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     text = response.text.strip()
 
     if "```json" in text:

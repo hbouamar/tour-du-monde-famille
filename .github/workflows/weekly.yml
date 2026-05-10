@@ -5,6 +5,9 @@ on:
     - cron: '0 14 * * 6'  # samedi 14h UTC = 16h Paris (heure d'été)
   workflow_dispatch:       # déclenchement manuel pour tests
 
+permissions:
+  contents: write
+
 jobs:
   generate-program:
     runs-on: ubuntu-latest

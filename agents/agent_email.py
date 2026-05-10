@@ -29,7 +29,8 @@ Réponds UNIQUEMENT avec le HTML (commence par <html>)."""
 
 def send_email(program: dict):
     gmail_user = os.environ["GMAIL_USER"]
-    gmail_password = os.environ["GMAIL_APP_PASSWORD"]
+    # Strip spaces/non-breaking spaces that Google inserts in displayed app passwords
+    gmail_password = "".join(c for c in os.environ["GMAIL_APP_PASSWORD"] if c.isalnum())
     recipient = os.environ["EMAIL_RECIPIENT"]
 
     country = program.get("country", "le monde")

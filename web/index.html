@@ -439,8 +439,8 @@ async function init() {
     document.getElementById('week-label').textContent = formatWeekLabel(program.week_start);
     document.title = `${flag} ${program.country} – Tour du Monde`;
 
+    render(program, progress);
     renderImages(program.cultural_images || []);
-  render(program, progress);
   } catch (e) {
     document.getElementById('main').innerHTML =
       `<div id="error">Impossible de charger le programme.<br><small>${e.message}</small></div>`;

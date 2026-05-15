@@ -282,6 +282,7 @@
     <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
   </div>
   <div class="progress-label" id="progress-label">Chargement…</div>
+  <div class="subtitle" id="country-counter" style="margin-top:0.5rem;opacity:0.7;font-size:0.8rem"></div>
 </header>
 
 <nav>
@@ -310,6 +311,8 @@ const TYPE_ICONS = {
   'histoire/géographie': '🗺️', film: '🎬', livre: '📚',
   'jeux/sports traditionnels': '🎯', default: '✨'
 };
+
+const _activityStore = {};  // id → activity object
 
 const STATUS_CYCLE = ['todo', 'doing', 'done', 'skip'];
 const STATUS_LABELS = { todo: '⬜ À faire', doing: '🔄 En cours', done: '✅ Fait', skip: '⏭️ Passé' };
@@ -374,6 +377,7 @@ function render(program, progress) {
     card.appendChild(header);
 
     for (const act of activities) {
+      _activityStore[act.id] = { ...act, country: program.country };
       const status  = progress[act.id] || 'todo';
       const icon    = TYPE_ICONS[act.type] || TYPE_ICONS.default;
 
@@ -386,7 +390,10 @@ function render(program, progress) {
           <div class="activity-title">${act.title}</div>
           <div class="activity-desc">${act.description}</div>
           <div class="activity-meta">${act.duration || ''} · ${act.type || ''}</div>
-          ${act.resource_query ? `<a class="activity-resource" href="https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Voir une vidéo</a>` : ''}
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            ${act.resource_query ? `<a class="activity-resource" href="https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Voir une vidéo</a>` : ''}
+            ${act.type === 'cuisine' ? `<a class="activity-resource" style="color:#68d391" href="#" data-recipe-id="${act.id}" onclick="event.stopPropagation();event.preventDefault();printRecipe(this.dataset.recipeId)">🖨️ Recette</a>` : ''}
+          </div>
         </div>
         <div class="status-badge status-${status}" data-id="${act.id}">${STATUS_LABELS[status]}</div>
       `;
@@ -480,6 +487,34 @@ function printImages() {
     </style></head><body>
     <h1>${country}</h1><p class="sub">${week}</p>
     <div class="grid">${rows}</div>
+    <script>window.onload = () => window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function printRecipe(id) {
+  const act = _activityStore[id];
+  if (!act) return;
+  const ytUrl = act.resource_query
+    ? `https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}`
+    : null;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+    <title>Recette : ${act.title}</title>
+    <style>
+      body { font-family: Georgia, serif; max-width: 600px; margin: 2rem auto; padding: 0 1.5rem; color: #2d3748; }
+      h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+      .meta { color: #718096; font-size: 0.9rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem; }
+      .description { font-size: 1rem; line-height: 1.7; white-space: pre-wrap; }
+      .yt-link { display:block; margin-top: 1.5rem; font-size: 0.85rem; color: #4299e1; }
+      .footer { margin-top: 2rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #a0aec0; text-align: center; }
+      @media print { @page { margin: 1.5cm; } a { color: inherit; } }
+    </style></head><body>
+    <h1>🍳 ${act.title}</h1>
+    <div class="meta">${act.country || ''} · ${act.duration || ''}</div>
+    <div class="description">${act.description}</div>
+    ${ytUrl ? `<a class="yt-link" href="${ytUrl}" target="_blank">▶ Voir la recette en vidéo : ${ytUrl}</a>` : ''}
+    <div class="footer">Tour du Monde en Famille 🌍</div>
     <script>window.onload = () => window.print();<\/script>
   </body></html>`);
   win.document.close();
@@ -590,7 +625,12 @@ async function init() {
     // Load history in background
     fetch(`${RAW}/archive.json`)
       .then(r => r.json())
-      .then(archive => renderHistory(archive))
+      .then(archive => {
+        renderHistory(archive);
+        const total = archive.length + 1; // +1 for current week
+        document.getElementById('country-counter').textContent =
+          `${total} pays exploré${total > 1 ? 's' : ''} 🗺️`;
+      })
       .catch(() => renderHistory([]));
 
   } catch (e) {

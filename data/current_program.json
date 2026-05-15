@@ -1,6 +1,15 @@
 {
   "country": "Japon",
   "week_start": "2026-05-11",
+  "cultural_images": [
+    {"label": "Mont Fuji", "wiki_en": "Mount_Fuji"},
+    {"label": "Cerisier en fleurs", "wiki_en": "Cherry_blossom"},
+    {"label": "Kimono", "wiki_en": "Kimono"},
+    {"label": "Sushis", "wiki_en": "Sushi"},
+    {"label": "Torii", "wiki_en": "Torii_gate"},
+    {"label": "Origami", "wiki_en": "Origami"},
+    {"label": "Tambour Taiko", "wiki_en": "Taiko"}
+  ],
   "days": {
     "lundi": {
       "theme": "Saveurs du Japon",

@@ -23,6 +23,14 @@ Réponds UNIQUEMENT avec un JSON valide :
 {{
   "country": "{country}",
   "week_start": "{week_start}",
+  "cultural_images": [
+    {{"label": "nom français de l'élément", "wiki_en": "English_Wikipedia_page_title"}},
+    {{"label": "...", "wiki_en": "..."}},
+    {{"label": "...", "wiki_en": "..."}},
+    {{"label": "...", "wiki_en": "..."}},
+    {{"label": "...", "wiki_en": "..."}},
+    {{"label": "...", "wiki_en": "..."}}
+  ],
   "days": {{
     "lundi": {{
       "theme": "thème court du jour",

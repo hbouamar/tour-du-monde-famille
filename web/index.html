@@ -142,6 +142,71 @@
     .day-vendredi .day-header { background: #faf5ff; color: #6b46c1; }
     .day-samedi   .day-header { background: #fff5f7; color: #97266d; }
 
+    .images-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .images-section h2 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .print-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .print-btn:hover { background: #5a67d8; }
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+    .image-card {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f7fafc;
+      text-align: center;
+    }
+    .image-card img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      display: block;
+    }
+    .image-card .img-placeholder {
+      width: 100%;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: #edf2f7;
+    }
+    .image-card span {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #4a5568;
+      padding: 0.3rem 0.4rem;
+    }
+
     #loading { text-align: center; padding: 3rem; color: #a0aec0; }
     #error { background: #fff5f5; color: #c53030; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: center; }
   </style>
@@ -278,6 +343,80 @@ function render(program, progress) {
   updateProgressUI(progress, total);
 }
 
+async function fetchWikiImage(wiki_en) {
+  try {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wiki_en)}`);
+    const data = await res.json();
+    return data.thumbnail?.source || null;
+  } catch { return null; }
+}
+
+function renderImages(items) {
+  if (!items.length) return;
+  const main = document.getElementById('main');
+  const section = document.createElement('div');
+  section.className = 'images-section';
+  section.innerHTML = `
+    <h2>
+      <span>🖨️ Tableau de la semaine</span>
+      <button class="print-btn" onclick="printImages()">Imprimer</button>
+    </h2>
+    <div class="images-grid" id="images-grid"></div>
+  `;
+  main.prepend(section);
+
+  const grid = document.getElementById('images-grid');
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'image-card';
+    card.id = `img-${item.wiki_en}`;
+    card.innerHTML = `<div class="img-placeholder">🌍</div><span>${item.label}</span>`;
+    grid.appendChild(card);
+
+    fetchWikiImage(item.wiki_en).then(src => {
+      if (src) {
+        card.querySelector('.img-placeholder').outerHTML = `<img src="${src}" alt="${item.label}" loading="lazy">`;
+      }
+    });
+  });
+}
+
+function printImages() {
+  const items = Array.from(document.querySelectorAll('.image-card'));
+  const country = document.getElementById('country-badge').textContent;
+  const week = document.getElementById('week-label').textContent;
+
+  const rows = items.map(card => {
+    const img = card.querySelector('img');
+    const label = card.querySelector('span').textContent;
+    const src = img ? img.src : '';
+    return `<div class="card">
+      ${src ? `<img src="${src}" alt="${label}">` : '<div class="placeholder">🌍</div>'}
+      <p>${label}</p>
+    </div>`;
+  }).join('');
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+    <title>Tableau ${country}</title>
+    <style>
+      body { font-family: sans-serif; padding: 1.5rem; }
+      h1 { text-align: center; font-size: 1.3rem; margin-bottom: 0.3rem; }
+      p.sub { text-align: center; color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+      .card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; text-align: center; }
+      .card img { width: 100%; height: 100px; object-fit: cover; display: block; }
+      .card .placeholder { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: #f5f5f5; }
+      .card p { font-size: 0.8rem; font-weight: 600; padding: 0.4rem; margin: 0; }
+      @media print { @page { margin: 1cm; } }
+    </style></head><body>
+    <h1>${country}</h1><p class="sub">${week}</p>
+    <div class="grid">${rows}</div>
+    <script>window.onload = () => window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
 async function init() {
   try {
     const [progRes, dataRes] = await Promise.all([
@@ -300,7 +439,8 @@ async function init() {
     document.getElementById('week-label').textContent = formatWeekLabel(program.week_start);
     document.title = `${flag} ${program.country} – Tour du Monde`;
 
-    render(program, progress);
+    renderImages(program.cultural_images || []);
+  render(program, progress);
   } catch (e) {
     document.getElementById('main').innerHTML =
       `<div id="error">Impossible de charger le programme.<br><small>${e.message}</small></div>`;

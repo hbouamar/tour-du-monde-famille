@@ -26,6 +26,18 @@ def run():
     history.append(chosen)
     with open("data/history.json", "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
+
+    # Archive the outgoing program before it gets replaced
+    try:
+        with open("data/archive.json", encoding="utf-8") as f:
+            archive = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        archive = []
+    if not any(e.get("week_start") == program.get("week_start") for e in archive):
+        archive.insert(0, program)
+        with open("data/archive.json", "w", encoding="utf-8") as f:
+            json.dump(archive, f, ensure_ascii=False, indent=2)
+
     print(f"  {len(history)} pays explorés au total")
 
     print("\n[4/4] Envoi de l'email récap...")

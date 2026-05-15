@@ -207,6 +207,66 @@
       padding: 0.3rem 0.4rem;
     }
 
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      max-width: 680px;
+      margin: 1.5rem auto 0;
+      padding: 0 1rem;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255,255,255,0.25);
+      color: white;
+      transition: background 0.15s;
+    }
+    .tab-btn.active { background: white; color: #667eea; }
+
+    .history-card {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .history-header {
+      padding: 0.9rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .history-header:hover { background: #f7fafc; }
+    .history-country { font-size: 1.1rem; font-weight: 700; }
+    .history-date { font-size: 0.8rem; color: #a0aec0; }
+    .history-toggle { font-size: 0.8rem; color: #a0aec0; }
+    .history-body { display: none; border-top: 1px solid #f0f4f8; }
+    .history-body.open { display: block; }
+    .history-images {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .history-images::-webkit-scrollbar { display: none; }
+    .history-img-card { flex-shrink: 0; text-align: center; width: 70px; }
+    .history-img-card img { width: 70px; height: 50px; object-fit: cover; border-radius: 6px; display: block; }
+    .history-img-card .hi-placeholder { width: 70px; height: 50px; border-radius: 6px; background: #edf2f7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .history-img-card span { font-size: 0.6rem; color: #718096; margin-top: 0.2rem; display: block; }
+    .history-day { padding: 0.5rem 1rem; border-top: 1px solid #f7fafc; }
+    .history-day-title { font-size: 0.75rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; margin-bottom: 0.3rem; }
+    .history-activity { font-size: 0.82rem; padding: 0.2rem 0; display: flex; gap: 0.5rem; align-items: baseline; }
+    .history-activity a { color: #4299e1; font-size: 0.72rem; text-decoration: none; white-space: nowrap; }
+    .history-activity a:hover { text-decoration: underline; }
+
     #loading { text-align: center; padding: 3rem; color: #a0aec0; }
     #error { background: #fff5f5; color: #c53030; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: center; }
   </style>
@@ -218,14 +278,22 @@
   <div class="subtitle">Hassan · Yovana · Alice · Liam</div>
   <div class="country-badge" id="country-badge">…</div>
   <div class="subtitle" id="week-label"></div>
-  <div class="progress-bar-wrap">
+  <div class="progress-bar-wrap" id="progress-bar-wrap">
     <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
   </div>
   <div class="progress-label" id="progress-label">Chargement…</div>
 </header>
 
+<nav>
+  <button class="tab-btn active" id="tab-week" onclick="showTab('week')">Cette semaine</button>
+  <button class="tab-btn" id="tab-history" onclick="showTab('history')">Historique</button>
+</nav>
+
 <main id="main">
   <div id="loading">Chargement du programme…</div>
+</main>
+<main id="main-history" style="display:none; max-width:680px; margin:1.5rem auto; padding:0 1rem 3rem;">
+  <div id="loading-history">Chargement de l'historique…</div>
 </main>
 
 <script>
@@ -417,6 +485,83 @@ function printImages() {
   win.document.close();
 }
 
+function showTab(tab) {
+  const isWeek = tab === 'week';
+  document.getElementById('main').style.display = isWeek ? '' : 'none';
+  document.getElementById('main-history').style.display = isWeek ? 'none' : '';
+  document.getElementById('tab-week').classList.toggle('active', isWeek);
+  document.getElementById('tab-history').classList.toggle('active', !isWeek);
+  document.getElementById('progress-bar-wrap').style.display = isWeek ? '' : 'none';
+}
+
+function renderHistory(archive) {
+  const container = document.getElementById('main-history');
+  if (!archive.length) {
+    container.innerHTML = '<p style="text-align:center;color:#a0aec0;padding:2rem">Aucun pays dans l\'historique pour l\'instant.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  const DAYS_ORDER = ['lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+
+  archive.forEach(entry => {
+    const flag = FLAGS[entry.country] || '🌍';
+    const card = document.createElement('div');
+    card.className = 'history-card';
+
+    const header = document.createElement('div');
+    header.className = 'history-header';
+    header.innerHTML = `
+      <div>
+        <div class="history-country">${flag} ${entry.country}</div>
+        <div class="history-date">${formatWeekLabel(entry.week_start)}</div>
+      </div>
+      <span class="history-toggle">▼</span>`;
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'history-body';
+
+    // Images row
+    if (entry.cultural_images?.length) {
+      const imgRow = document.createElement('div');
+      imgRow.className = 'history-images';
+      entry.cultural_images.forEach(item => {
+        const ic = document.createElement('div');
+        ic.className = 'history-img-card';
+        ic.innerHTML = `<div class="hi-placeholder">🌍</div><span>${item.label}</span>`;
+        imgRow.appendChild(ic);
+        fetchWikiImage(item.wiki_en).then(src => {
+          if (src) ic.querySelector('.hi-placeholder').outerHTML = `<img src="${src}" alt="${item.label}" loading="lazy">`;
+        });
+      });
+      body.appendChild(imgRow);
+    }
+
+    // Days
+    const days = entry.days || {};
+    DAYS_ORDER.filter(d => days[d]).forEach(day => {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'history-day';
+      const acts = (days[day].activities || []).map(a => {
+        const yt = a.resource_query
+          ? `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(a.resource_query)}" target="_blank" rel="noopener">▶ vidéo</a>`
+          : '';
+        return `<div class="history-activity"><span>${TYPE_ICONS[a.type] || '✨'} ${a.title}</span>${yt}</div>`;
+      }).join('');
+      dayEl.innerHTML = `<div class="history-day-title">${DAYS_FR[day]} — ${days[day].theme || ''}</div>${acts}`;
+      body.appendChild(dayEl);
+    });
+
+    header.addEventListener('click', () => {
+      const open = body.classList.toggle('open');
+      header.querySelector('.history-toggle').textContent = open ? '▲' : '▼';
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
 async function init() {
   try {
     const [progRes, dataRes] = await Promise.all([
@@ -441,6 +586,13 @@ async function init() {
 
     render(program, progress);
     renderImages(program.cultural_images || []);
+
+    // Load history in background
+    fetch(`${RAW}/archive.json`)
+      .then(r => r.json())
+      .then(archive => renderHistory(archive))
+      .catch(() => renderHistory([]));
+
   } catch (e) {
     document.getElementById('main').innerHTML =
       `<div id="error">Impossible de charger le programme.<br><small>${e.message}</small></div>`;

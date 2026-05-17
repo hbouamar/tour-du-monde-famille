@@ -1,0 +1,11 @@
+[Unit]
+Description=Family World Tour — génération programme hebdomadaire
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/hbouamar/family-world-tour
+ExecStart=/home/hbouamar/family-world-tour/venv/bin/python -m agents.orchestrator
+StandardOutput=append:/home/hbouamar/family-world-tour/logs/agents.log
+StandardError=append:/home/hbouamar/family-world-tour/logs/agents.log

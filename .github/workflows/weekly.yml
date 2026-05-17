@@ -1,9 +1,10 @@
 name: Weekly Tour du Monde
 
 on:
-  schedule:
-    - cron: '0 14 * * 6'  # samedi 14h UTC = 16h Paris (heure d'été)
-  workflow_dispatch:       # déclenchement manuel pour tests
+  # Cron désactivé — agents tournent sur le Pi (systemd timer)
+  # schedule:
+  #   - cron: '0 14 * * 6'  # samedi 14h UTC = 16h Paris (heure d'été)
+  workflow_dispatch:       # déclenchement manuel conservé pour tests
 
 permissions:
   contents: write

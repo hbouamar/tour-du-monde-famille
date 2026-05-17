@@ -285,8 +285,7 @@
 </main>
 
 <script>
-const REPO = 'hbouamar/tour-du-monde-famille';
-const RAW  = `https://raw.githubusercontent.com/${REPO}/main/data`;
+const RAW = '/data';
 
 const DAYS_FR = {
   lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi',
@@ -519,8 +518,8 @@ function renderHistory(archive) {
         ic.className = 'history-img-card';
         ic.innerHTML = `<div class="hi-placeholder">🌍</div><span>${item.label}</span>`;
         imgRow.appendChild(ic);
-        fetchWikiImage(item.wiki_en).then(src => {
-          if (src) ic.querySelector('.hi-placeholder').outerHTML = `<img src="${src}" alt="${item.label}" loading="lazy">`;
+        fetchWikiImage(item.wiki_en).then(({ thumb }) => {
+          if (thumb) ic.querySelector('.hi-placeholder').outerHTML = `<img src="${thumb}" alt="${item.label}" loading="lazy">`;
         });
       });
       body.appendChild(imgRow);

@@ -4,9 +4,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from google import genai
+from agents.config import load_config
 
 
 def _generate_html(program: dict) -> str:
+    load_config()
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     prompt = f"""Rédige un email récapitulatif familial pour le programme culturel de la semaine.

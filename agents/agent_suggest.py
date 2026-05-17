@@ -1,9 +1,11 @@
 import json
 import os
 from google import genai
+from agents.config import load_config
 
 
 def suggest_countries() -> list[str]:
+    load_config()
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     with open("data/history.json", encoding="utf-8") as f:

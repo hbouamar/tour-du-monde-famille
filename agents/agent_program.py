@@ -2,11 +2,13 @@ import json
 import os
 from datetime import datetime, timedelta
 from google import genai
+from agents.config import load_config
 
 DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
 
 
 def generate_program(country: str) -> dict:
+    load_config()
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     today = datetime.today()

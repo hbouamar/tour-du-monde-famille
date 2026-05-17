@@ -1,0 +1,9 @@
+[Unit]
+Description=Family World Tour — timer samedi 14h UTC (16h Paris heure d'été)
+
+[Timer]
+OnCalendar=Sat *-*-* 14:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

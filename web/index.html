@@ -120,7 +120,7 @@
     .tab-btn:not(.active):hover { color: var(--text); }
 
     /* ─── MAIN ────────────────────────────────────────────── */
-    main { max-width: 680px; margin: 1.5rem auto; padding: 0 1rem 4rem; }
+    main { max-width: 960px; margin: 1.5rem auto; padding: 0 1.5rem 4rem; }
 
     /* ─── IMAGES SECTION ──────────────────────────────────── */
     .images-section {
@@ -297,6 +297,32 @@
     .activity.done .activity-title { text-decoration: line-through; color: var(--text3); }
     .activity.skip { opacity: 0.42; }
 
+    /* ─── WEEK LAYOUT (sidebar desktop) ─────────────────────── */
+    .week-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    @media (min-width: 700px) {
+      .week-layout {
+        grid-template-columns: 110px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .day-selector {
+        flex-direction: column !important;
+        overflow: visible !important;
+        margin-bottom: 0 !important;
+        position: sticky;
+        top: calc(49px + 1.5rem);
+      }
+      .day-chip {
+        width: 100%;
+        flex-direction: row !important;
+        justify-content: space-between;
+      }
+    }
+
     /* ─── DAY SELECTOR ───────────────────────────────────────── */
     .day-selector {
       display: flex;
@@ -436,7 +462,7 @@
 <main id="main">
   <div id="loading">Chargement du programme…</div>
 </main>
-<main id="main-history" style="display:none; max-width:680px; margin:1.5rem auto; padding:0 1rem 3rem;">
+<main id="main-history" style="display:none; max-width:960px; margin:1.5rem auto; padding:0 1.5rem 3rem;">
   <div id="loading-history">Chargement de l'historique…</div>
 </main>
 
@@ -600,12 +626,17 @@ function render(program, progress) {
     chip.addEventListener('click', () => switchDay(day));
     selector.appendChild(chip);
   });
-  main.appendChild(selector);
 
   // Container for the selected day view
   const dayView = document.createElement('div');
   dayView.id = 'day-view';
-  main.appendChild(dayView);
+
+  // Wrap both in a 2-col grid (desktop sidebar)
+  const layout = document.createElement('div');
+  layout.className = 'week-layout';
+  layout.appendChild(selector);
+  layout.appendChild(dayView);
+  main.appendChild(layout);
 
   // Default to today if in the program, otherwise first day
   const todayKey = TODAY_MAP[new Date().getDay()];

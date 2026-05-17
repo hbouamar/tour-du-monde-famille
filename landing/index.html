@@ -47,7 +47,7 @@
 
     .cards {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -56,11 +56,11 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      width: 220px;
-      padding: 28px;
+      width: 300px;
+      padding: 36px 32px 30px;
       background: #0d1829;
       border: 1px solid #1a2740;
-      border-radius: 18px;
+      border-radius: 20px;
       text-decoration: none;
       color: inherit;
       overflow: hidden;
@@ -69,22 +69,22 @@
 
     a.card:hover {
       border-color: #2d3f5a;
-      transform: translateY(-5px);
-      box-shadow: 0 24px 48px rgba(0,0,0,.55);
+      transform: translateY(-6px);
+      box-shadow: 0 28px 56px rgba(0,0,0,.6);
     }
 
     /* Glow behind icon */
     a.card::before {
       content: '';
       position: absolute;
-      top: -30px; left: -30px;
-      width: 140px; height: 140px;
+      top: -40px; left: -40px;
+      width: 180px; height: 180px;
       border-radius: 50%;
       opacity: 0;
       transition: opacity .3s;
     }
-    a.card:nth-child(1)::before { background: radial-gradient(circle, rgba(99,102,241,.28), transparent 70%); }
-    a.card:nth-child(2)::before { background: radial-gradient(circle, rgba(16,185,129,.28), transparent 70%); }
+    a.card:nth-child(1)::before { background: radial-gradient(circle, rgba(99,102,241,.3), transparent 70%); }
+    a.card:nth-child(2)::before { background: radial-gradient(circle, rgba(16,185,129,.3), transparent 70%); }
     a.card:hover::before { opacity: 1; }
 
     /* Top accent line */
@@ -100,27 +100,34 @@
     a.card:nth-child(2)::after { background: linear-gradient(90deg, #10b981, #3b82f6); }
     a.card:hover::after { opacity: 1; }
 
-    .card-icon {
-      font-size: 2rem;
-      line-height: 1;
-      margin-bottom: 18px;
+    .card-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 22px;
       position: relative;
       z-index: 1;
     }
+    a.card:nth-child(1) .card-icon-wrap { background: rgba(99,102,241,.18); }
+    a.card:nth-child(2) .card-icon-wrap { background: rgba(16,185,129,.18); }
 
     .card-title {
-      font-size: 0.98rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #e2e8f0;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       position: relative;
       z-index: 1;
     }
 
     .card-desc {
-      font-size: 0.78rem;
+      font-size: 0.83rem;
       color: #3f4f67;
-      line-height: 1.55;
+      line-height: 1.6;
       flex: 1;
       position: relative;
       z-index: 1;
@@ -129,25 +136,24 @@
     .card-link {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-top: 22px;
-      font-size: 0.76rem;
+      gap: 5px;
+      margin-top: 28px;
+      font-size: 0.8rem;
       font-weight: 600;
       transition: color .2s, gap .2s;
       position: relative;
       z-index: 1;
       color: #2d3f5a;
     }
-    a.card:nth-child(1):hover .card-link { color: #818cf8; gap: 8px; }
-    a.card:nth-child(2):hover .card-link { color: #34d399; gap: 8px; }
+    a.card:nth-child(1):hover .card-link { color: #818cf8; gap: 10px; }
+    a.card:nth-child(2):hover .card-link { color: #34d399; gap: 10px; }
 
-    @media (max-width: 480px) {
-      .cards { gap: 12px; }
-      a.card { width: 100%; max-width: 320px; flex-direction: row; align-items: center; gap: 16px; padding: 20px 22px; }
-      .card-icon { font-size: 1.8rem; margin-bottom: 0; }
+    @media (max-width: 520px) {
+      .cards { gap: 14px; flex-direction: column; align-items: center; }
+      a.card { width: 100%; max-width: 340px; flex-direction: row; align-items: center; gap: 18px; padding: 22px 24px; }
+      .card-icon-wrap { margin-bottom: 0; flex-shrink: 0; width: 48px; height: 48px; }
       .card-link { display: none; }
-      .card-desc { display: none; }
-      h1 { font-size: 1.8rem; }
+      h1 { font-size: 2rem; }
     }
   </style>
 </head>
@@ -157,13 +163,13 @@
   <p class="tagline">Bienvenue chez les Bouamar 👋</p>
   <div class="cards">
     <a class="card" href="https://pronote.krousty.uk">
-      <span class="card-icon">📚</span>
+      <span class="card-icon-wrap">📚</span>
       <span class="card-title">Pronote Dashboard</span>
       <span class="card-desc">Notes, devoirs et emploi du temps de Liam</span>
       <span class="card-link">Accéder →</span>
     </a>
     <a class="card" href="https://family.krousty.uk">
-      <span class="card-icon">🌍</span>
+      <span class="card-icon-wrap">🌍</span>
       <span class="card-title">Tour du monde</span>
       <span class="card-desc">Programme culturel hebdomadaire de la famille</span>
       <span class="card-link">Accéder →</span>

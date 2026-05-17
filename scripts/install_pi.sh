@@ -5,7 +5,7 @@
 set -e
 
 PI="hbouamar@myRasp.local"
-REPO="https://github.com/hbouamar/family-world-tour.git"
+REPO="https://github.com/hbouamar/tour-du-monde-famille.git"
 TUNNEL_ID="2f8948fe-5623-4a0f-95d0-d6a44aa4875e"
 MAC_PROJECT="$HOME/Projects/family-world-tour"
 
@@ -41,6 +41,8 @@ else
 fi
 
 echo "=== 5. Config nginx ==="
+# nginx tourne en www-data — il doit pouvoir traverser le home
+ssh "$PI" "chmod o+x /home/hbouamar"
 ssh "$PI" "sudo cp ~/family-world-tour/scripts/nginx/family-world-tour.conf /etc/nginx/sites-available/family-world-tour"
 ssh "$PI" "sudo ln -sf /etc/nginx/sites-available/family-world-tour /etc/nginx/sites-enabled/family-world-tour"
 ssh "$PI" "sudo nginx -t && sudo systemctl reload nginx"

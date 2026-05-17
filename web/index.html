@@ -297,6 +297,67 @@
     .activity.done .activity-title { text-decoration: line-through; color: var(--text3); }
     .activity.skip { opacity: 0.42; }
 
+    /* ─── DAY SELECTOR ───────────────────────────────────────── */
+    .day-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 3px;
+    }
+    .day-selector::-webkit-scrollbar { display: none; }
+
+    .day-chip {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+      font-family: inherit;
+      outline: none;
+    }
+    .day-chip:hover:not(.active) { background: #f1f5f9; }
+
+    .chip-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text2);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      transition: background .25s;
+    }
+    .chip-dot.partial { background: #f59e0b; }
+    .chip-dot.full    { background: #22c55e; }
+
+    .day-chip.active { border-width: 2px; }
+    .day-chip.day-lundi.active    { border-color: #ef4444; background: #fff5f5; }
+    .day-chip.day-lundi.active    .chip-label { color: #dc2626; }
+    .day-chip.day-mardi.active    { border-color: #f97316; background: #fff7ed; }
+    .day-chip.day-mardi.active    .chip-label { color: #ea580c; }
+    .day-chip.day-mercredi.active { border-color: #22c55e; background: #f0fdf4; }
+    .day-chip.day-mercredi.active .chip-label { color: #16a34a; }
+    .day-chip.day-jeudi.active    { border-color: #3b82f6; background: #eff6ff; }
+    .day-chip.day-jeudi.active    .chip-label { color: #2563eb; }
+    .day-chip.day-vendredi.active { border-color: #8b5cf6; background: #faf5ff; }
+    .day-chip.day-vendredi.active .chip-label { color: #7c3aed; }
+    .day-chip.day-samedi.active   { border-color: #ec4899; background: #fdf2f8; }
+    .day-chip.day-samedi.active   .chip-label { color: #db2777; }
+
     /* ─── HISTORY ─────────────────────────────────────────── */
     .history-card {
       background: var(--card);
@@ -437,66 +498,121 @@ function formatWeekLabel(weekStart) {
   return `Semaine du ${fmt(d)} au ${fmt(end)}`;
 }
 
+// State partagé entre render / switchDay / updateChipDots
+const _state = { days: {}, progress: {}, total: 0, country: '' };
+
+const DAY_ABBR = {
+  lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer',
+  jeudi: 'Jeu', vendredi: 'Ven', samedi: 'Sam'
+};
+const TODAY_MAP = {
+  0: 'dimanche', 1: 'lundi', 2: 'mardi', 3: 'mercredi',
+  4: 'jeudi', 5: 'vendredi', 6: 'samedi'
+};
+
+function updateChipDots() {
+  Object.keys(_state.days).forEach(day => {
+    const acts = _state.days[day].activities || [];
+    const done = acts.filter(a => _state.progress[a.id] === 'done').length;
+    const dot = document.querySelector(`.day-chip.day-${day} .chip-dot`);
+    if (!dot) return;
+    dot.className = 'chip-dot' + (done === acts.length && acts.length > 0 ? ' full' : done > 0 ? ' partial' : '');
+  });
+}
+
+function switchDay(day) {
+  // Update active chip
+  document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.day-chip.day-${day}`)?.classList.add('active');
+
+  // Render day content
+  const container = document.getElementById('day-view');
+  container.innerHTML = '';
+
+  const data = _state.days[day];
+  if (!data) return;
+
+  const card = document.createElement('div');
+  card.className = `day-card day-${day}`;
+
+  const header = document.createElement('div');
+  header.className = 'day-header';
+  header.innerHTML = `<span>${DAYS_FR[day] || day}</span><span class="day-theme">${data.theme || ''}</span>`;
+  card.appendChild(header);
+
+  for (const act of (data.activities || [])) {
+    _activityStore[act.id] = { ...act, country: _state.country };
+    const status = _state.progress[act.id] || 'todo';
+    const icon   = TYPE_ICONS[act.type] || TYPE_ICONS.default;
+
+    const el = document.createElement('div');
+    el.className = `activity ${status}`;
+    el.dataset.id = act.id;
+    el.innerHTML = `
+      <div class="activity-icon">${icon}</div>
+      <div class="activity-body">
+        <div class="activity-title">${act.title}</div>
+        <div class="activity-desc">${act.description}</div>
+        <div class="activity-meta">${act.duration || ''} · ${act.type || ''}</div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          ${act.resource_query ? `<a class="activity-resource" href="https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Voir une vidéo</a>` : ''}
+          ${act.type === 'cuisine' ? `<a class="activity-resource" style="color:#16a34a" href="#" data-recipe-id="${act.id}" onclick="event.stopPropagation();event.preventDefault();printRecipe(this.dataset.recipeId)">🖨️ Recette</a>` : ''}
+        </div>
+      </div>
+      <div class="status-badge status-${status}" data-id="${act.id}">${STATUS_LABELS[status]}</div>
+    `;
+
+    el.addEventListener('click', () => {
+      const p = _state.progress;
+      const cur = p[act.id] || 'todo';
+      const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
+      p[act.id] = next;
+      saveProgress(p);
+      el.className = `activity ${next}`;
+      el.querySelector('.status-badge').className = `status-badge status-${next}`;
+      el.querySelector('.status-badge').textContent = STATUS_LABELS[next];
+      updateProgressUI(p, _state.total);
+      updateChipDots();
+    });
+
+    card.appendChild(el);
+  }
+  container.appendChild(card);
+}
+
 function render(program, progress) {
+  // Populate shared state
+  _state.days     = program.days || {};
+  _state.progress = progress;
+  _state.country  = program.country || '';
+  _state.total    = Object.values(_state.days).reduce((s, d) => s + (d.activities || []).length, 0);
+
   const main = document.getElementById('main');
   main.innerHTML = '';
-  const days = program.days || {};
-  const dayKeys = Object.keys(days);
-  let total = 0;
 
-  for (const day of dayKeys) {
-    const data = days[day];
-    const activities = data.activities || [];
-    total += activities.length;
+  // Day selector chips
+  const selector = document.createElement('div');
+  selector.className = 'day-selector';
+  Object.keys(_state.days).forEach(day => {
+    const chip = document.createElement('button');
+    chip.className = `day-chip day-${day}`;
+    chip.innerHTML = `<span class="chip-label">${DAY_ABBR[day] || day}</span><span class="chip-dot"></span>`;
+    chip.addEventListener('click', () => switchDay(day));
+    selector.appendChild(chip);
+  });
+  main.appendChild(selector);
 
-    const card = document.createElement('div');
-    card.className = `day-card day-${day}`;
+  // Container for the selected day view
+  const dayView = document.createElement('div');
+  dayView.id = 'day-view';
+  main.appendChild(dayView);
 
-    const header = document.createElement('div');
-    header.className = 'day-header';
-    header.innerHTML = `<span>${DAYS_FR[day] || day}</span><span class="day-theme">${data.theme || ''}</span>`;
-    card.appendChild(header);
-
-    for (const act of activities) {
-      _activityStore[act.id] = { ...act, country: program.country };
-      const status  = progress[act.id] || 'todo';
-      const icon    = TYPE_ICONS[act.type] || TYPE_ICONS.default;
-
-      const el = document.createElement('div');
-      el.className = `activity ${status}`;
-      el.dataset.id = act.id;
-      el.innerHTML = `
-        <div class="activity-icon">${icon}</div>
-        <div class="activity-body">
-          <div class="activity-title">${act.title}</div>
-          <div class="activity-desc">${act.description}</div>
-          <div class="activity-meta">${act.duration || ''} · ${act.type || ''}</div>
-          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-            ${act.resource_query ? `<a class="activity-resource" href="https://www.youtube.com/results?search_query=${encodeURIComponent(act.resource_query)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Voir une vidéo</a>` : ''}
-            ${act.type === 'cuisine' ? `<a class="activity-resource" style="color:#16a34a" href="#" data-recipe-id="${act.id}" onclick="event.stopPropagation();event.preventDefault();printRecipe(this.dataset.recipeId)">🖨️ Recette</a>` : ''}
-          </div>
-        </div>
-        <div class="status-badge status-${status}" data-id="${act.id}">${STATUS_LABELS[status]}</div>
-      `;
-
-      el.addEventListener('click', () => {
-        const p = getProgress();
-        const cur = p[act.id] || 'todo';
-        const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
-        p[act.id] = next;
-        saveProgress(p);
-        el.className = `activity ${next}`;
-        el.querySelector('.status-badge').className = `status-badge status-${next}`;
-        el.querySelector('.status-badge').textContent = STATUS_LABELS[next];
-        updateProgressUI(p, total);
-      });
-
-      card.appendChild(el);
-    }
-    main.appendChild(card);
-  }
-
-  updateProgressUI(progress, total);
+  // Default to today if in the program, otherwise first day
+  const todayKey = TODAY_MAP[new Date().getDay()];
+  const defaultDay = _state.days[todayKey] ? todayKey : Object.keys(_state.days)[0];
+  switchDay(defaultDay);
+  updateChipDots();
+  updateProgressUI(progress, _state.total);
 }
 
 async function fetchWikiImage(wiki_en) {

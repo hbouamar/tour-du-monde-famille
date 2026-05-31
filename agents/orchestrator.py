@@ -7,8 +7,27 @@ from agents.agent_program import generate_program
 from agents.agent_email import send_email
 
 
+def _all_activities_completed() -> bool:
+    try:
+        with open("data/progress.json", encoding="utf-8") as f:
+            progress = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return True  # pas de programme en cours → on peut en générer un
+    if not progress:
+        return True
+    return all(status in ("done", "skip") for status in progress.values())
+
+
 def run():
     print("=== Tour du Monde en Famille — Orchestrateur ===")
+
+    if not _all_activities_completed():
+        with open("data/progress.json", encoding="utf-8") as f:
+            progress = json.load(f)
+        pending = [k for k, v in progress.items() if v not in ("done", "skip")]
+        print(f"\n⏸  Programme en cours non terminé ({len(pending)} activité(s) restante(s) : {', '.join(pending)})")
+        print("   Aucun nouveau pays proposé. Terminez les activités d'abord.")
+        return
 
     print("\n[1/4] Suggestion de pays...")
     countries = suggest_countries()
